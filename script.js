@@ -5,37 +5,70 @@ class List{
     }
 
     createList(){
-        let list = document.createElement('div');
-        list.classList.add('listContainer');
-        list.setAttribute('id', this.id);
+        let listBase = this.createListBase();
+        let [nameContainer, taskContainer] = this.createContainers();
+        let name = this.createName();
+        let listBody = document.createElement('ul');
+        let task = this.createTask();
+        let input = document.createElement('input');
+        let deleteListButton = this.createDeleteListButton();
+        this.addEventListeners(listBase);
+        
+
+        document.querySelector('.listsContainer').append(listBase);
+        listBase.append(nameContainer);
+        listBase.append(taskContainer);
+        nameContainer.append(name);
+        nameContainer.append(deleteListButton);
+        taskContainer.append(input);
+        taskContainer.append(task);
+        listBase.append(listBody);
+    }
+
+    createListBase(){
+        let listBase = document.createElement('div');
+        listBase.classList.add('listContainer');
+        listBase.setAttribute('id', this.id);
+        return listBase;
+    }
+
+    createContainers(){
         let nameContainer = document.createElement('div');
         nameContainer.classList.add('nameContainer');
         let taskContainer = document.createElement('div');
         taskContainer.classList.add('taskContainer');
-        
+        return [nameContainer, taskContainer];
+    }
+
+    createName(){
         let name = document.createElement('h1');
         name.addEventListener('click', () => this.changeListName(this.id));
         name.textContent = this.name;
+        return name;
+    }
 
-        let listBody = document.createElement('ul');
+    createTask(){
+        let task = document.createElement('button');
+        task.addEventListener('click', () => this.addTask(this.id));
+        task.textContent = 'Add task';
+        return task;
+    }
 
-        let createTask = document.createElement('button');
-        createTask.addEventListener('click', () => this.addTask(this.id));
-        createTask.textContent = 'Add task';
+    createDeleteListButton(){
+        let deleteListButton = document.createElement('button');
+        deleteListButton.addEventListener('click', () => this.deleteList(this.id));
+        deleteListButton.textContent = 'Delete';
+        return deleteListButton;
+    }
 
-        let input = document.createElement('input');
-
-        let deleteList = document.createElement('button');
-        deleteList.addEventListener('click', () => this.deleteList(this.id));
-        deleteList.textContent = 'Delete';
-
-        list.addEventListener('dragstart', (e) => {
+    addEventListeners(listBase){
+        listBase.addEventListener('dragstart', (e) => {
             e.target.classList.add('selected');
         });
-        list.addEventListener('dragend', (e => {
+        listBase.addEventListener('dragend', (e => {
             e.target.classList.remove('selected');
         }));
-        list.addEventListener('dragover', (e) => {
+        listBase.addEventListener('dragover', (e) => {
             e.preventDefault();
             let selectedTask = document.querySelector('.selected');
             let currentElement = e.target;
@@ -46,42 +79,32 @@ class List{
             let nextElement = (currentElement === selectedTask?.nextElementSibling) ? currentElement.nextElementSibling : currentElement;
             e.target.closest('ul').insertBefore(selectedTask, nextElement);
         })
-
-        document.querySelector('.listsContainer').append(list);
-        list.append(nameContainer);
-        list.append(taskContainer);
-        nameContainer.append(name);
-        nameContainer.append(deleteList);
-        taskContainer.append(input);
-        taskContainer.append(createTask);
-        list.append(listBody);
+        // return listBase;
     }
 
     addTask(id){
         let task = document.createElement('li');
         task.draggable = 'true';
         task.classList.add('dragItem');
-        // let completeTask = document.createElement('input');
-        // completeTask.type = 'checkbox';
-        // task.append(completeTask);
+        let checkBoxElement = document.createElement('input');
+        checkBoxElement.type = 'checkbox';
         // task.insertAdjacentHTML('afterbegin', '<input type="checkbox"');
         let taskText = document.querySelector(`#${id}`).querySelector('.taskContainer input').value;
+        task.append(checkBoxElement);
         document.querySelector(`#${id}`).querySelector('ul').append(task);
         
+        console.log(document.querySelector(`#${id}`).querySelector('ul'));
         task.textContent = taskText;
         task.addEventListener('dblclick', (e) => this.deleteTask(e));
-        // completeTask.addEventListener('change', (e) => this.completeTask(e))
+        // checkBoxElement.addEventListener('change', (e) => this.checkBoxElement(e))
     }
 
     deleteTask(e){
         let li = e.target.closest('li');
-        if(li) {
-            // li.nextSibling.remove();
-            li.remove();
-        }
+        if(li) li.remove();
     }
 
-    completeTask(e){
+    checkBoxElement(e){
         let input = e.target.closest('input');
         if(input) input.previousSibling.classList.toggle('done');
     }
@@ -117,7 +140,6 @@ class List{
 
 }
 
-let list;
 let count = 0;
 document.querySelector('.createList').addEventListener('click', () => {
     let list = new List(count);
